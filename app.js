@@ -1,8 +1,20 @@
-const http = require('http');
+const http = require("http");
 
+const express = require("express");
 
-const server = http.createServer((req, res) => {
-    console.log(req)
-}); 
+const app = express();
 
-server.listen(3000);
+app.use("/", (req, res, next) => {
+  console.log("middlware number 1");
+  next();
+});
+
+app.use("/add-product", (req, res, next) => {
+  res.send("<h1>Hello from Product!</h1>");
+});
+
+app.use("/", (req, res, next) => {
+  res.send("<h1>Hello from Express!</h1>");
+});
+
+app.listen(3000);
