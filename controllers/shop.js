@@ -45,7 +45,7 @@ exports.getIndex = async (req, res, next) => {
 exports.getCart = async (req, res, next) => {
   try {
     const cart = await req.user.getCart();
-    
+
     res.render("shop/cart", {
       path: "/cart",
       pageTitle: "Your Cart",
@@ -59,13 +59,16 @@ exports.getCart = async (req, res, next) => {
 exports.postCart = async (req, res, next) => {
   try {
     const prodId = req.body.productId;
-    Product.findById(prodId)
-      .then((product) => {
-        return req.user.addToCart(product);
-      })
-      .then((result) => {
-        console.log(result);
-      });
+    const product = await Product.findById(prodId);
+
+    if (!product) {
+      return res.redirect("/cart");
+    }
+
+    const result = await req.user.addToCart(product);
+    console.log(result);
+
+    res.redirect("/cart");
   } catch (err) {
     console.log(err);
   }
