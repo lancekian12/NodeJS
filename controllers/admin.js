@@ -1,4 +1,3 @@
-const mongodb = require("mongodb");
 const Product = require("../models/product");
 
 exports.getAddProduct = async (req, res, next) => {
@@ -10,7 +9,6 @@ exports.getAddProduct = async (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  console.log("test");
   const title = req.body.title;
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
@@ -18,15 +16,16 @@ exports.postAddProduct = (req, res, next) => {
   const product = new Product(title, price, description, imageUrl);
   product
     .save()
-    .then((result) => {
+    .then(result => {
       // console.log(result);
-      console.log("Created Product");
-      res.redirect("/admin/products");
+      console.log('Created Product');
+      res.redirect('/admin/products');
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 };
+
 
 exports.getEditProduct = async (req, res, next) => {
   try {
@@ -97,23 +96,23 @@ exports.getProducts = async (req, res, next) => {
   }
 };
 
-// exports.postDeleteProduct = async (req, res, next) => {
-//   try {
-//     const prodId = req.body.productId;
-//     const product = await Product.findByPk(prodId);
+exports.postDeleteProduct = async (req, res, next) => {
+  try {
+    const prodId = req.body.productId;
+    const product = await Product.deleteById(prodId);
 
-//     if (!product) {
-//       return res.redirect("/admin/products");
-//     }
+    if (!product) {
+      return res.redirect("/admin/products");
+    }
 
-//     await product.destroy();
+    await product.destroy();
 
-//     console.log("DESTROYED PRODUCT");
-//     res.redirect("/admin/products");
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
+    console.log("DESTROYED PRODUCT");
+    res.redirect("/admin/products");
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 /////////////////////////////////////////////////// SQL
 // const Product = require("../models/product");
