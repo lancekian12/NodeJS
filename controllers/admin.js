@@ -27,30 +27,30 @@ exports.postAddProduct = (req, res, next) => {
     });
 };
 
-// exports.getEditProduct = async (req, res, next) => {
-//   try {
-//     const editMode = req.query.edit;
-//     if (!editMode) {
-//       return res.redirect("/");
-//     }
+exports.getEditProduct = async (req, res, next) => {
+  try {
+    const editMode = req.query.edit;
+    if (!editMode) {
+      return res.redirect("/");
+    }
 
-//     const prodId = req.params.productId;
-//     const product = await req.user.getProducts({where: {id: prodId}})
+    const prodId = req.params.productId;
+    const product = await Product.findById(prodId)
 
-//     if (!product) {
-//       return res.redirect("/");
-//     }
+    if (!product) {
+      return res.redirect("/");
+    }
 
-//     res.render("admin/edit-product", {
-//       pageTitle: "Edit Product",
-//       path: "/admin/edit-product",
-//       editing: editMode,
-//       product,
-//     });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
+    res.render("admin/edit-product", {
+      pageTitle: "Edit Product",
+      path: "/admin/edit-product",
+      editing: editMode,
+      product,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 // exports.postEditProduct = async (req, res, next) => {
 //   try {
