@@ -9,6 +9,7 @@ exports.getAddProduct = async (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
+  console.log("test");
   const title = req.body.title;
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
@@ -16,12 +17,12 @@ exports.postAddProduct = (req, res, next) => {
   const product = new Product(title, price, description, imageUrl);
   product
     .save()
-    .then(result => {
+    .then((result) => {
       // console.log(result);
-      console.log('Created Product');
-      res.redirect('/admin/products');
+      console.log("Created Product");
+      res.redirect("/admin/products");
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 };
@@ -35,7 +36,7 @@ exports.postAddProduct = (req, res, next) => {
 
 //     const prodId = req.params.productId;
 //     const product = await req.user.getProducts({where: {id: prodId}})
- 
+
 //     if (!product) {
 //       return res.redirect("/");
 //     }
@@ -107,7 +108,6 @@ exports.postAddProduct = (req, res, next) => {
 //   }
 // };
 
-
 /////////////////////////////////////////////////// SQL
 // const Product = require("../models/product");
 
@@ -143,7 +143,7 @@ exports.postAddProduct = (req, res, next) => {
 
 //     const prodId = req.params.productId;
 //     const product = await req.user.getProducts({where: {id: prodId}})
- 
+
 //     if (!product) {
 //       return res.redirect("/");
 //     }
