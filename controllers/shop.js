@@ -60,24 +60,13 @@ exports.getCart = async (req, res, next) => {
 exports.postCart = async (req, res, next) => {
   try {
     const prodId = req.body.productId;
-    let newQuantity = 1;
-
-    const cart = await req.user.getCart();
-    const products = await cart.getProducts({ where: { id: prodId } });
-
-    let product;
-    if (products.length > 0) {
-      product = products[0];
-      newQuantity = product.cartItem.quantity + 1;
-    } else {
-      product = await Product.findByPk(prodId);
-    }
-
-    await cart.addProduct(product, {
-      through: { quantity: newQuantity },
-    });
-
-    res.redirect("/cart");
+    Product.findById(prodId)
+      .then((product) => {
+        return req.user.addToCart(product);
+      })
+      .then((result) => {
+        console.log(result);
+      });
   } catch (err) {
     console.log(err);
   }
@@ -116,16 +105,16 @@ exports.postOrder = async (req, res, next) => {
     const order = await req.user.createOrder();
 
     await order.addProducts(
-      products.map(product => {
+      products.map((product) => {
         product.orderItem = {
-          quantity: product.cartItem.quantity
+          quantity: product.cartItem.quantity,
         };
         return product;
       })
     );
 
     await cart.setProducts(null);
-    res.redirect('/orders');
+    res.redirect("/orders");
   } catch (err) {
     console.error(err);
   }
@@ -134,19 +123,18 @@ exports.postOrder = async (req, res, next) => {
 exports.getOrders = async (req, res, next) => {
   try {
     const orders = await req.user.getOrders({
-      include: ['products']
+      include: ["products"],
     });
 
-    res.render('shop/orders', {
-      path: '/orders',
-      pageTitle: 'Your Orders',
-      orders
+    res.render("shop/orders", {
+      path: "/orders",
+      pageTitle: "Your Orders",
+      orders,
     });
   } catch (err) {
     console.error(err);
   }
 };
-
 
 exports.getCheckout = async (req, res, next) => {
   res.render("shop/checkout", {
@@ -154,7 +142,6 @@ exports.getCheckout = async (req, res, next) => {
     pageTitle: "Checkout",
   });
 };
-
 
 /////////////////////////////////////////// SQL
 // const Product = require("../models/product");
@@ -305,7 +292,6 @@ exports.getCheckout = async (req, res, next) => {
 //     console.error(err);
 //   }
 // };
-
 
 // exports.getCheckout = async (req, res, next) => {
 //   res.render("shop/checkout", {
