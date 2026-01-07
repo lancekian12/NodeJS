@@ -6,7 +6,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const errorController = require("./controllers/error");
-const mongoConnect = require("./utils/database");
+const { mongoConnect } = require("./utils/database");
 
 const app = express();
 
@@ -33,10 +33,11 @@ app.use((req, res, next) => {
 
 app.use(errorController.get404);
 
-mongoConnect((client) => {
-  app.listen(3000);
+mongoConnect(() => {
+  app.listen(3000, () => {
+    console.log("Server running on http://localhost:3000");
+  });
 });
-
 ////////////////////////////////////////////// SEQUELIZE DATABASE
 // const express = require("express");
 // const bodyParser = require("body-parser");
