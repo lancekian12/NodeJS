@@ -1,4 +1,6 @@
+const mongodb = require("mongodb");
 const Product = require("../models/product");
+const ObjectId = mongodb.ObjectId;
 
 exports.getAddProduct = async (req, res, next) => {
   res.render("admin/edit-product", {
@@ -35,7 +37,7 @@ exports.getEditProduct = async (req, res, next) => {
     }
 
     const prodId = req.params.productId;
-    const product = await Product.findById(prodId)
+    const product = await Product.findById(prodId);
 
     if (!product) {
       return res.redirect("/");
@@ -52,33 +54,39 @@ exports.getEditProduct = async (req, res, next) => {
   }
 };
 
-// exports.postEditProduct = async (req, res, next) => {
-//   try {
-//     const { productId, title, price, imageUrl, description } = req.body;
+exports.postEditProduct = async (req, res, next) => {
+  try {
+    const { productId, title, price, imageUrl, description } = req.body;
 
-//     const product = await Product.findByPk(productId);
+    const product = new Product(
+      title,
+      imageUrl,
+      imageUrl,
+      description,
+      new ObjectId(productId)
+    );
 
-//     if (!product) {
-//       return res.redirect("/");
-//     }
+    if (!product) {
+      return res.redirect("/");
+    }
 
-//     product.title = title;
-//     product.price = price;
-//     product.imageUrl = imageUrl;
-//     product.description = description;
+    product.title = title;
+    product.price = price;
+    product.imageUrl = imageUrl;
+    product.description = description;
 
-//     await product.save();
+    await product.save();
 
-//     console.log("UPDATED PRODUCT!");
-//     res.redirect("/admin/products");
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
+    console.log("UPDATED PRODUCT!");
+    res.redirect("/admin/products");
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 exports.getProducts = async (req, res, next) => {
   try {
-    const products = await Product.fetchAll()
+    const products = await Product.fetchAll();
 
     res.render("admin/products", {
       prods: products,
