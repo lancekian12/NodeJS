@@ -58,13 +58,7 @@ exports.postEditProduct = async (req, res, next) => {
   try {
     const { productId, title, price, imageUrl, description } = req.body;
 
-    const product = new Product(
-      title,
-      imageUrl,
-      imageUrl,
-      description,
-      productId
-    );
+    const product = await Product.findById(productId);
 
     if (!product) {
       return res.redirect("/");
@@ -86,7 +80,7 @@ exports.postEditProduct = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
   try {
-    const products = await Product.fetchAll();
+    const products = await Product.find();
 
     res.render("admin/products", {
       prods: products,
