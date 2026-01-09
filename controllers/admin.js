@@ -95,13 +95,12 @@ exports.getProducts = async (req, res, next) => {
 exports.postDeleteProduct = async (req, res, next) => {
   try {
     const prodId = req.body.productId;
-    const product = await Product.deleteById(prodId);
+    const product = await Product.findByIdAndDelete(prodId);
 
     if (!product) {
       return res.redirect("/admin/products");
     }
 
-    await product.destroy();
 
     console.log("DESTROYED PRODUCT");
     res.redirect("/admin/products");
