@@ -7,7 +7,7 @@ const bodyParser = require("body-parser");
 
 const errorController = require("./controllers/error");
 const database = require("./utils/database");
-// const User = require('./models/userMongo')
+const User = require("./models/user");
 
 const app = express();
 
@@ -20,14 +20,14 @@ const shopRoutes = require("./routes/shop");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// app.use((req, res, next) => {
-//   User.findById('695ee61f05744e0a5b9f0433')
-//     .then(user => {
-//       req.user = new User(user.name, user.email, user.cart, user._id);
-//       next();
-//     })
-//     .catch(err => console.log(err));
-// });
+app.use((req, res, next) => {
+  User.findById("69606e182993a0c10af71f53")
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => console.log(err));
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
@@ -36,6 +36,7 @@ app.use(errorController.get404);
 
 database()
   .then(() => {
+    
     app.listen(3000, () => {
       console.log("🚀 Server running on http://localhost:3000");
     });

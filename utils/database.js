@@ -20,6 +20,7 @@ const mongoConnect = async () => {
 
     await mongoose.connect(uri);
 
+
     console.log("✅ Connected to MongoDB via Mongoose");
   } catch (err) {
     console.error("❌ MongoDB connection failed:", err);
