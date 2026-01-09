@@ -10,8 +10,6 @@ exports.getAddProduct = async (req, res, next) => {
 
 exports.postAddProduct = async (req, res, next) => {
   try {
-    console.log("testttttttttt");
-
     const { title, imageUrl, price, description } = req.body;
 
     const product = new Product({
@@ -19,7 +17,7 @@ exports.postAddProduct = async (req, res, next) => {
       price,
       description,
       imageUrl,
-      userId: req.user 
+      userId: req.user,
     });
 
     await product.save();
@@ -81,8 +79,8 @@ exports.postEditProduct = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
   try {
-    const products = await Product.find();
-
+    const products = await Product.find()
+    console.log(products);
     res.render("admin/products", {
       prods: products,
       pageTitle: "Admin Products",
@@ -101,7 +99,6 @@ exports.postDeleteProduct = async (req, res, next) => {
     if (!product) {
       return res.redirect("/admin/products");
     }
-
 
     console.log("DESTROYED PRODUCT");
     res.redirect("/admin/products");
