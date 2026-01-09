@@ -15,20 +15,20 @@ exports.getProducts = async (req, res, next) => {
   }
 };
 
-// exports.getProduct = async (req, res, next) => {
-//   try {
-//     const prodId = req.params.productId;
-//     const product = await Product.findById(prodId);
+exports.getProduct = async (req, res, next) => {
+  try {
+    const prodId = req.params.productId;
+    const product = await Product.findById(prodId);
 
-//     res.render("shop/product-detail", {
-//       product: product,
-//       pageTitle: product.title,
-//       path: "/products",
-//     });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
+    res.render("shop/product-detail", {
+      product: product,
+      pageTitle: product.title,
+      path: "/products",
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 exports.getIndex = async (req, res, next) => {
   console.log("testtt");
