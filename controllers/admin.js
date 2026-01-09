@@ -1,4 +1,4 @@
-const Product = require("../models/productMongo");
+const Product = require("../models/product");
 
 exports.getAddProduct = async (req, res, next) => {
   res.render("admin/edit-product", {
@@ -9,18 +9,12 @@ exports.getAddProduct = async (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
+  console.log("testttttttttt");
   const title = req.body.title;
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  const product = new Product(
-    title,
-    price,
-    description,
-    imageUrl,
-    null,
-    req.user._id
-  );
+  const product = new Product({ title, price, description, imageUrl });
   product
     .save()
     .then((result) => {
