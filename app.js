@@ -6,8 +6,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const errorController = require("./controllers/error");
-const { mongoConnect } = require("./utils/database");
-const User = require('./models/user')
+const database = require("./utils/database");
+const User = require('./models/userMongo')
 
 const app = express();
 
@@ -34,11 +34,15 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-mongoConnect(() => {
-  app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+database()
+  .then(() => {
+    app.listen(3000, () => {
+      console.log("🚀 Server running on http://localhost:3000");
+    });
+  })
+  .catch(err => {
+    console.log(err);
   });
-});
 ////////////////////////////////////////////// SEQUELIZE DATABASE
 // const express = require("express");
 // const bodyParser = require("body-parser");

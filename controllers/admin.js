@@ -1,4 +1,4 @@
-const Product = require("../models/product");
+const Product = require("../models/productMongo");
 
 exports.getAddProduct = async (req, res, next) => {
   res.render("admin/edit-product", {

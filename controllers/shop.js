@@ -1,4 +1,4 @@
-const Product = require("../models/product");
+const Product = require("../models/productMongo");
 const Cart = require("../models/cart");
 
 exports.getProducts = async (req, res, next) => {
@@ -91,12 +91,12 @@ exports.postCartDeleteProduct = async (req, res, next) => {
     res.redirect("/cart");
   } catch (err) {
     console.log(err);
-  } 
+  }
 };
 
 exports.postOrder = async (req, res, next) => {
   try {
-    await req.user.addOrder()
+    await req.user.addOrder();
     res.redirect("/orders");
   } catch (err) {
     console.error(err);

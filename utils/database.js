@@ -1,12 +1,11 @@
-const { MongoClient } = require("mongodb");
+const mongoose = require("mongoose");
 
-let _db;
-
-const mongoConnect = async (callback) => {
+const mongoConnect = async () => {
   try {
     const user = process.env.DB_USER || "lancekian";
     const password = process.env.DB_PASSWORD;
-    const host = process.env.DB_HOST || "nodejs-course.0ggknfc.mongodb.net";
+    const host =
+      process.env.DB_HOST || "nodejs-course.0ggknfc.mongodb.net";
     const dbName = process.env.DB_NAME || "myDatabase";
 
     if (!password) {
@@ -19,30 +18,17 @@ const mongoConnect = async (callback) => {
       process.env.MONGODB_URI ||
       `mongodb+srv://${user}:${encodedPassword}@${host}/${dbName}?retryWrites=true&w=majority`;
 
-    const client = await MongoClient.connect(uri);
+    await mongoose.connect(uri);
 
-    console.log("Connected to MongoDB!");
-
-    _db = client.db(dbName);
-
-    callback(client);
+    console.log("✅ Connected to MongoDB via Mongoose");
   } catch (err) {
-    console.error("MongoDB connection failed:", err);
+    console.error("❌ MongoDB connection failed:", err);
     throw err;
   }
 };
 
-const getDb = () => {
-  if (_db) {
-    return _db;
-  }
-  throw new Error("No database found! Did you connect first?");
-};
+module.exports = mongoConnect;
 
-module.exports = {
-  mongoConnect,
-  getDb,
-};
 // const Sequelize = require('sequelize')
 // require('dotenv').config()
 // const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {dialect: 'mysql', host: process.env.DB_HOST})
