@@ -1,16 +1,26 @@
 require("dotenv").config();
+const user = process.env.DB_USER;
+const password = process.env.DB_PASSWORD;
+const host = process.env.DB_HOST;
+const dbName = process.env.DB_NAME;
+const encodedPassword = encodeURIComponent(password);
+const MONGODB_URI = `mongodb+srv://${user}:${encodedPassword}@${host}/${dbName}?retryWrites=true&w=majority`;
 
 const path = require("path");
 
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
-
+const MongoDBStore = require("connect-mongodb-session")(session);
 const errorController = require("./controllers/error");
 const database = require("./utils/database");
 const User = require("./models/user");
 
 const app = express();
+const store = new MongoDBStore({
+  uri: MONGODB_URI,
+  collection: "sessions",
+});
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -27,6 +37,7 @@ app.use(
     secret: process.env.SECRETKEY,
     resave: false,
     saveUninitialized: false,
+    store: store,
   })
 );
 
