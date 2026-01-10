@@ -8,7 +8,13 @@ exports.getLogin = (req, res, next) => {
 
 exports.postLogin = (req, res, next) => {
   req.session.isLoggedIn = true;
-  res.redirect("/");
+
+  req.session.save(err => {
+    if (err) {
+      console.log(err);
+    }
+    res.redirect("/");
+  });
 };
 
 exports.postLogout = (req, res, next) => {
