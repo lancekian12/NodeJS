@@ -4,6 +4,7 @@ const path = require("path");
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const session = require("express-session");
 
 const errorController = require("./controllers/error");
 const database = require("./utils/database");
@@ -20,6 +21,14 @@ const authRoutes = require("./routes/auth");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use(
+  session({
+    secret: process.env.SECRETKEY,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 app.use((req, res, next) => {
   User.findById("69606e182993a0c10af71f53")
@@ -38,7 +47,6 @@ app.use(errorController.get404);
 
 database()
   .then(() => {
-    
     app.listen(3000, () => {
       console.log("🚀 Server running on http://localhost:3000");
     });
