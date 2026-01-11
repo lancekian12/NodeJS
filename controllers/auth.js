@@ -5,7 +5,7 @@ exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    isAuthenticated: req.isLoggedIn,
+    isAuthenticated: req.session ? req.session.isLoggedIn : false,
   });
 };
 
@@ -18,14 +18,30 @@ exports.getSignup = (req, res, next) => {
 };
 
 exports.postLogin = (req, res, next) => {
-  req.session.isLoggedIn = true;
+  const email = req.body.email;
+  const password = req.body.password;
+  User.findOne({ email: email })
+    .then(user => {
+      if (!user) {
+        return res.redirect('/login');
+      }
+      return bcrypt.compare(password, user.password).then(doMatch => {
+        if (!doMatch) {
+          return res.redirect('/login');
+        }
+        req.session.isLoggedIn = true;
+        req.session.user = { _id: user._id.toString(), email: user.email };
 
-  req.session.save((err) => {
-    if (err) {
+        return req.session.save(err => {
+          if (err) console.log(err);
+          res.redirect('/');
+        });
+      });
+    })
+    .catch(err => {
       console.log(err);
-    }
-    res.redirect("/");
-  });
+      res.redirect('/login');
+    });
 };
 
 exports.postSignup = async (req, res, next) => {
@@ -54,8 +70,11 @@ exports.postSignup = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.postLogout = (req, res, next) => {
-  req.session.destroy(() => {
-    res.redirect("/");
+  req.session.destroy(err => {
+    if (err) console.log(err);
+    res.clearCookie('connect.sid'); 
+    res.redirect('/');
   });
 };

@@ -41,15 +41,22 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  User.findById("69606e182993a0c10af71f53")
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => console.log(err));
-});
+app.use(async (req, res, next) => {
+  if (!req.session || !req.session.user) {
+    return next();
+  }
 
+  try {
+    const user = await User.findById(req.session.user._id);
+    if (!user) {
+      return next();
+    }
+    req.user = user; 
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
