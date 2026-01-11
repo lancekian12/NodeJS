@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const mongoConnect = async () => {
   try {
-    const user = process.env.DB_USER || "lancekian";
+    const user = process.env.DB_USER
     const password = process.env.DB_PASSWORD;
     const host =
-      process.env.DB_HOST || "nodejs-course.0ggknfc.mongodb.net";
-    const dbName = process.env.DB_NAME || "myDatabase";
+      process.env.DB_HOST 
+    const dbName = process.env.DB_NAME
 
     if (!password) {
       throw new Error("Missing DB_PASSWORD in .env");
