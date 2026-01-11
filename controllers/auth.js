@@ -16,39 +16,61 @@ exports.getLogin = (req, res, next) => {
 };
 
 exports.getSignup = (req, res, next) => {
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Signup",
+    errorMessage: message,
   });
 };
 
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  User.findOne({ email: email })
-    .then((user) => {
-      if (!user) {
-        req.flash("error", "Invalid email or password");
-        return res.redirect("/login");
-      }
-      return bcrypt.compare(password, user.password).then((doMatch) => {
-        if (!doMatch) {
-          return res.redirect("/login");
-        }
-        req.session.isLoggedIn = true;
-        req.session.user = { _id: user._id.toString(), email: user.email };
 
-        return req.session.save((err) => {
-          if (err) console.log(err);
-          res.redirect("/");
+  User.findOne({ email })
+    .then(user => {
+      if (!user) {
+        req.flash('error', 'Invalid email or password.');
+        return res.redirect('/login');
+      }
+
+      bcrypt.compare(password, user.password)
+        .then(doMatch => {
+          if (doMatch) {
+            req.session.isLoggedIn = true;
+            // Save only plain object
+            req.session.user = { _id: user._id.toString(), email: user.email };
+
+            return req.session.save(err => {
+              if (err) {
+                console.log(err);
+                return res.redirect('/login');
+              }
+              res.redirect('/');
+            });
+          } else {
+            req.flash('error', 'Invalid email or password.');
+            res.redirect('/login');
+          }
+        })
+        .catch(err => {
+          console.log(err);
+          res.redirect('/login');
         });
-      });
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
-      res.redirect("/login");
+      res.redirect('/login');
     });
 };
+
+
 exports.postSignup = async (req, res, next) => {
   try {
     const { email, password, confirmPassword } = req.body;
@@ -56,6 +78,7 @@ exports.postSignup = async (req, res, next) => {
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
+      req.flash("error", "E-Mail exists already, please pick a different one.");
       return res.redirect("/signup");
     }
 
