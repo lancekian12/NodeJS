@@ -55,27 +55,36 @@ exports.getEditProduct = async (req, res, next) => {
 
 exports.postEditProduct = async (req, res, next) => {
   try {
-    const { productId, title, price, imageUrl, description } = req.body;
+    const prodId = req.body.productId;
+    const updatedTitle = req.body.title;
+    const updatedPrice = req.body.price;
+    const updatedImageUrl = req.body.imageUrl;
+    const updatedDesc = req.body.description;
 
-    const product = await Product.findById(productId);
+    const product = await Product.findById(prodId);
 
     if (!product) {
-      return res.redirect("/");
+      return res.redirect('/');
     }
 
-    product.title = title;
-    product.price = price;
-    product.imageUrl = imageUrl;
-    product.description = description;
+    if (product.userId.toString() !== req.user._id.toString()) {
+      return res.redirect('/');
+    }
+
+    product.title = updatedTitle;
+    product.price = updatedPrice;
+    product.description = updatedDesc;
+    product.imageUrl = updatedImageUrl;
 
     await product.save();
 
-    console.log("UPDATED PRODUCT!");
-    res.redirect("/admin/products");
+    console.log('UPDATED PRODUCT!');
+    res.redirect('/admin/products');
   } catch (err) {
     console.log(err);
   }
 };
+
 
 exports.getProducts = async (req, res, next) => {
   try {
@@ -94,14 +103,14 @@ exports.getProducts = async (req, res, next) => {
 exports.postDeleteProduct = async (req, res, next) => {
   try {
     const prodId = req.body.productId;
-    const product = await Product.findByIdAndDelete(prodId);
 
-    if (!product) {
-      return res.redirect("/admin/products");
-    }
+    await Product.deleteOne({
+      _id: prodId,
+      userId: req.user._id
+    });
 
-    console.log("DESTROYED PRODUCT");
-    res.redirect("/admin/products");
+    console.log('DESTROYED PRODUCT');
+    res.redirect('/admin/products');
   } catch (err) {
     console.log(err);
   }
