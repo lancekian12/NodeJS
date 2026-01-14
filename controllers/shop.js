@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 const Product = require("../models/product");
 const Order = require("../models/order");
 
@@ -11,10 +14,10 @@ exports.getProducts = async (req, res, next) => {
       path: "/products",
     });
   } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.httpsStatusCode = 500
-    return next(error)
+    console.log(err);
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -29,10 +32,10 @@ exports.getProduct = async (req, res, next) => {
       path: "/products",
     });
   } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.httpsStatusCode = 500
-    return next(error)
+    console.log(err);
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -46,10 +49,10 @@ exports.getIndex = async (req, res, next) => {
       path: "/",
     });
   } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.httpsStatusCode = 500
-    return next(error)
+    console.log(err);
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -64,10 +67,10 @@ exports.getCart = async (req, res, next) => {
       products,
     });
   } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.httpsStatusCode = 500
-    return next(error)
+    console.log(err);
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -79,10 +82,10 @@ exports.postCart = async (req, res, next) => {
     await req.user.addToCart(product);
     res.redirect("/cart");
   } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.httpsStatusCode = 500
-    return next(error)
+    console.log(err);
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -93,10 +96,10 @@ exports.postCartDeleteProduct = async (req, res, next) => {
 
     res.redirect("/cart");
   } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.httpsStatusCode = 500
-    return next(error)
+    console.log(err);
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -122,10 +125,10 @@ exports.postOrder = async (req, res, next) => {
 
     res.redirect("/orders");
   } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.httpsStatusCode = 500
-    return next(error)
+    console.log(err);
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -139,19 +142,46 @@ exports.getOrders = async (req, res, next) => {
       orders,
     });
   } catch (err) {
-    console.log(err)
-    const error = new Error(err)
-    error.httpsStatusCode = 500
-    return next(error)
+    console.log(err);
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    return next(error);
   }
 };
 
-// exports.getCheckout = async (req, res, next) => {
-//   res.render("shop/checkout", {
-//     path: "/checkout",
-//     pageTitle: "Checkout",
-//   });
-// };
+exports.getInvoice = async (req, res, next) => {
+  const orderId = req.params.orderId;
+
+  try {
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      const error = new Error("No order found.");
+      error.httpStatusCode = 404;
+      throw error;
+    }
+
+    // ✅ CORRECT user check for this schema
+    if (order.user.userId.toString() !== req.user._id.toString()) {
+      const error = new Error("Unauthorized");
+      error.httpStatusCode = 403;
+      throw error;
+    }
+
+    const invoiceName = `invoice-${orderId}.pdf`;
+    const invoicePath = path.join("data", "invoices", invoiceName);
+
+    const fileData = await fs.promises.readFile(invoicePath);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename="${invoiceName}"`);
+
+    res.send(fileData);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
 
 // /////////////////////////////////////////// SQL
 // // const Product = require("../models/product");
