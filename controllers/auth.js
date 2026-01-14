@@ -122,8 +122,10 @@ exports.postSignup = async (req, res, next) => {
 
     res.redirect("/login");
   } catch (err) {
-    console.log(err);
-    next(err);
+    console.log(err)
+    const error = new Error(err)
+    error.httpsStatusCode = 500
+    return next(error)
   }
 };
 

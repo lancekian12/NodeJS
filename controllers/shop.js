@@ -11,7 +11,10 @@ exports.getProducts = async (req, res, next) => {
       path: "/products",
     });
   } catch (err) {
-    console.log(err);
+    console.log(err)
+    const error = new Error(err)
+    error.httpsStatusCode = 500
+    return next(error)
   }
 };
 
@@ -26,7 +29,10 @@ exports.getProduct = async (req, res, next) => {
       path: "/products",
     });
   } catch (err) {
-    console.log(err);
+    console.log(err)
+    const error = new Error(err)
+    error.httpsStatusCode = 500
+    return next(error)
   }
 };
 
@@ -39,8 +45,11 @@ exports.getIndex = async (req, res, next) => {
       pageTitle: "Shop",
       path: "/",
     });
-  } catch (err) { 
-    console.log(err);
+  } catch (err) {
+    console.log(err)
+    const error = new Error(err)
+    error.httpsStatusCode = 500
+    return next(error)
   }
 };
 
@@ -55,7 +64,10 @@ exports.getCart = async (req, res, next) => {
       products,
     });
   } catch (err) {
-    console.log(err);
+    console.log(err)
+    const error = new Error(err)
+    error.httpsStatusCode = 500
+    return next(error)
   }
 };
 
@@ -67,7 +79,10 @@ exports.postCart = async (req, res, next) => {
     await req.user.addToCart(product);
     res.redirect("/cart");
   } catch (err) {
-    console.log(err);
+    console.log(err)
+    const error = new Error(err)
+    error.httpsStatusCode = 500
+    return next(error)
   }
 };
 
@@ -78,7 +93,10 @@ exports.postCartDeleteProduct = async (req, res, next) => {
 
     res.redirect("/cart");
   } catch (err) {
-    console.log(err);
+    console.log(err)
+    const error = new Error(err)
+    error.httpsStatusCode = 500
+    return next(error)
   }
 };
 
@@ -104,7 +122,10 @@ exports.postOrder = async (req, res, next) => {
 
     res.redirect("/orders");
   } catch (err) {
-    console.log(err);
+    console.log(err)
+    const error = new Error(err)
+    error.httpsStatusCode = 500
+    return next(error)
   }
 };
 
@@ -118,7 +139,10 @@ exports.getOrders = async (req, res, next) => {
       orders,
     });
   } catch (err) {
-    console.log(err);
+    console.log(err)
+    const error = new Error(err)
+    error.httpsStatusCode = 500
+    return next(error)
   }
 };
 
