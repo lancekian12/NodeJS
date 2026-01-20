@@ -150,35 +150,28 @@ exports.getOrders = async (req, res, next) => {
 };
 
 exports.getInvoice = async (req, res, next) => {
-  const orderId = req.params.orderId;
-
   try {
-    const order = await Order.findById(orderId);
+    const orderId = req.params.orderId;
 
+    const order = await Order.findById(orderId);
     if (!order) {
-      const error = new Error("No order found.");
-      error.httpStatusCode = 404;
-      throw error;
+      throw new Error("No order found.");
     }
 
-    // ✅ CORRECT user check for this schema
     if (order.user.userId.toString() !== req.user._id.toString()) {
-      const error = new Error("Unauthorized");
-      error.httpStatusCode = 403;
-      throw error;
+      throw new Error("Unauthorized");
     }
 
     const invoiceName = `invoice-${orderId}.pdf`;
     const invoicePath = path.join("data", "invoices", invoiceName);
 
-    const fileData = await fs.promises.readFile(invoicePath);
+    const file = fs.createReadStream(invoicePath);
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename="${invoiceName}"`);
 
-    res.send(fileData);
+    file.pipe(res);
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
