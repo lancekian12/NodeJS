@@ -10,21 +10,31 @@ const PDFDocument = require("pdfkit");
 
 exports.getProducts = async (req, res, next) => {
   try {
-    const products = await Product.find();
+    const page = +req.query.page || 1;
+
+    const totalItems = await Product.find().countDocuments();
+
+    const products = await Product.find()
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
 
     res.render("shop/product-list", {
       prods: products,
-      pageTitle: "All Products",
+      pageTitle: "Products",
       path: "/products",
+      currentPage: page,
+      hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
     });
   } catch (err) {
-    console.log(err);
     const error = new Error(err);
-    error.httpsStatusCode = 500;
-    return next(error);
+    error.httpStatusCode = 500;
+    next(error);
   }
 };
-
 exports.getProduct = async (req, res, next) => {
   try {
     const prodId = req.params.productId;
