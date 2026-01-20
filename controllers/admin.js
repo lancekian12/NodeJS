@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
-const Product = require("../models/product");
+const Product = require("../models/product"); 
+const fileHelper = require('../utils/file')
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -142,6 +143,7 @@ exports.postEditProduct = async (req, res, next) => {
     product.price = price;
     product.description = description;
     if (image) {
+      fileHelper.deleteFile(product.imageUrl)
       product.imageUrl = image.path;
     }
 
@@ -175,15 +177,28 @@ exports.getProducts = async (req, res, next) => {
 
 exports.postDeleteProduct = async (req, res, next) => {
   const prodId = req.body.productId;
+
   try {
-    await Product.deleteOne({ _id: prodId, userId: req.user._id });
+    const product = await Product.findById(prodId);
+
+    if (!product) {
+      return next(new Error("Product not found."));
+    }
+
+    if (product.userId.toString() !== req.user._id.toString()) {
+      return next(new Error("Unauthorized"));
+    }
+
+    fileHelper.deleteFile(product.imageUrl);
+
+    await Product.deleteOne({ _id: prodId });
+
     console.log("DESTROYED PRODUCT");
     res.redirect("/admin/products");
   } catch (err) {
     console.log(err);
-    const error = new Error(err);
-    error.httpsStatusCode = 500;
-    return next(error);
+    err.httpStatusCode = 500;
+    next(err);
   }
 };
 
