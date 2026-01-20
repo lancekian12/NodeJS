@@ -45,7 +45,11 @@ exports.getProduct = async (req, res, next) => {
 
 exports.getIndex = async (req, res, next) => {
   try {
-    const page = req.query.page;
+    const page = +req.query.page || 1;
+    let totalItems;
+
+    totalItems = await Product.find().countDocuments();
+
     const products = await Product.find()
       .skip((page - 1) * ITEMS_PER_PAGE)
       .limit(ITEMS_PER_PAGE);
@@ -54,12 +58,17 @@ exports.getIndex = async (req, res, next) => {
       prods: products,
       pageTitle: "Shop",
       path: "/",
+      totalProducts: totalItems,
+      hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
     });
   } catch (err) {
-    console.log(err);
     const error = new Error(err);
-    error.httpsStatusCode = 500;
-    return next(error);
+    error.httpStatusCode = 500;
+    next(error);
   }
 };
 
