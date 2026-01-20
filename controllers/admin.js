@@ -1,6 +1,6 @@
 const { validationResult } = require("express-validator");
-const Product = require("../models/product"); 
-const fileHelper = require('../utils/file')
+const Product = require("../models/product");
+const fileHelper = require("../utils/file");
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -113,7 +113,7 @@ exports.getEditProduct = async (req, res, next) => {
 
 exports.postEditProduct = async (req, res, next) => {
   const { productId, title, price, description } = req.body;
-   const image = req.file;
+  const image = req.file;
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -143,7 +143,7 @@ exports.postEditProduct = async (req, res, next) => {
     product.price = price;
     product.description = description;
     if (image) {
-      fileHelper.deleteFile(product.imageUrl)
+      fileHelper.deleteFile(product.imageUrl);
       product.imageUrl = image.path;
     }
 
@@ -175,30 +175,28 @@ exports.getProducts = async (req, res, next) => {
   }
 };
 
-exports.postDeleteProduct = async (req, res, next) => {
-  const prodId = req.body.productId;
+exports.deleteProduct = async (req, res, next) => {
+  const prodId = req.params.productId;
 
   try {
     const product = await Product.findById(prodId);
 
     if (!product) {
-      return next(new Error("Product not found."));
+      return res.status(404).json({ message: "Product not found." });
     }
 
     if (product.userId.toString() !== req.user._id.toString()) {
-      return next(new Error("Unauthorized"));
+      return res.status(403).json({ message: "Unauthorized" });
     }
 
     fileHelper.deleteFile(product.imageUrl);
-
     await Product.deleteOne({ _id: prodId });
 
     console.log("DESTROYED PRODUCT");
-    res.redirect("/admin/products");
+    res.status(200).json({ message: "Success!" });
   } catch (err) {
     console.log(err);
-    err.httpStatusCode = 500;
-    next(err);
+    res.status(500).json({ message: "Deleting product failed." });
   }
 };
 
