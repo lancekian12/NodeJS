@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import Image from "../../../components/Image/Image";
 import "./SinglePost.css";
 
-function SinglePost() {
+const SinglePost = () => {
   const { postId } = useParams();
 
   const [title, setTitle] = useState("");
@@ -14,23 +14,21 @@ function SinglePost() {
   const [content, setContent] = useState("");
 
   useEffect(() => {
-    fetch("URL")
-      .then(res => {
+    fetch(`http://localhost:8080/feed/post/${postId}`)
+      .then((res) => {
         if (res.status !== 200) {
           throw new Error("Failed to fetch post");
         }
         return res.json();
       })
-      .then(resData => {
+      .then((resData) => {
         setTitle(resData.post.title);
         setAuthor(resData.post.creator.name);
-        setDate(
-          new Date(resData.post.createdAt).toLocaleDateString("en-US")
-        );
+        setImage("http://localhost:8080/" + resData.post.imageUrl);
+        setDate(new Date(resData.post.createdAt).toLocaleDateString("en-US"));
         setContent(resData.post.content);
-        setImage(resData.post.imageUrl);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
       });
   }, [postId]);
@@ -47,6 +45,6 @@ function SinglePost() {
       <p>{content}</p>
     </section>
   );
-}
+};
 
 export default SinglePost;

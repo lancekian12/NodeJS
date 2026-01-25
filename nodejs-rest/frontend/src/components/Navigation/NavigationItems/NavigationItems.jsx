@@ -1,15 +1,15 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React from 'react';
+import { NavLink } from 'react-router-dom';
 
-import "./NavigationItems.css";
+import './NavigationItems.css';
 
 const navItems = [
-  { id: "feed", text: "Feed", link: "/", auth: true },
-  { id: "login", text: "Login", link: "/", auth: false },
-  { id: "signup", text: "Signup", link: "/signup", auth: false }
+  { id: 'feed', text: 'Feed', link: '/', auth: true },
+  { id: 'login', text: 'Login', link: '/', auth: false },
+  { id: 'signup', text: 'Signup', link: '/signup', auth: false }
 ];
 
-function NavigationItems({ isAuth, mobile = false, onChoose, onLogout }) {
+const NavigationItems = ({ isAuth, mobile, onChoose, onLogout }) => {
   return (
     <ul className="navigation-items">
       {navItems
@@ -17,9 +17,9 @@ function NavigationItems({ isAuth, mobile = false, onChoose, onLogout }) {
         .map(item => (
           <li
             key={item.id}
-            className={`navigation-item ${mobile ? "mobile" : ""}`}
+            className={['navigation-item', mobile ? 'mobile' : ''].join(' ')}
           >
-            <NavLink to={item.link} end onClick={onChoose}>
+            <NavLink to={item.link} exact="true" onClick={onChoose}>
               {item.text}
             </NavLink>
           </li>
@@ -32,6 +32,6 @@ function NavigationItems({ isAuth, mobile = false, onChoose, onLogout }) {
       )}
     </ul>
   );
-}
+};
 
 export default NavigationItems;
