@@ -18,7 +18,7 @@ function App() {
 
   const [showBackdrop, setShowBackdrop] = useState(false);
   const [showMobileNav, setShowMobileNav] = useState(false);
-  const [isAuth, setIsAuth] = useState(false);
+  const [isAuth, setIsAuth] = useState(true);
   const [token, setToken] = useState(null);
   const [userId, setUserId] = useState(null);
   const [authLoading, setAuthLoading] = useState(false);
@@ -51,7 +51,7 @@ function App() {
   // ======================
   // HANDLERS
   // ======================
-  const mobileNavHandler = isOpen => {
+  const mobileNavHandler = (isOpen) => {
     setShowMobileNav(isOpen);
     setShowBackdrop(isOpen);
   };
@@ -75,13 +75,13 @@ function App() {
     setAuthLoading(true);
 
     fetch("URL")
-      .then(res => {
+      .then((res) => {
         if (res.status === 422) throw new Error("Validation failed.");
         if (res.status !== 200 && res.status !== 201)
           throw new Error("Could not authenticate you!");
         return res.json();
       })
-      .then(resData => {
+      .then((resData) => {
         setIsAuth(true);
         setToken(resData.token);
         setUserId(resData.userId);
@@ -92,14 +92,14 @@ function App() {
 
         const remainingMilliseconds = 60 * 60 * 1000;
         const expiryDate = new Date(
-          new Date().getTime() + remainingMilliseconds
+          new Date().getTime() + remainingMilliseconds,
         );
 
         localStorage.setItem("expiryDate", expiryDate.toISOString());
         setAutoLogout(remainingMilliseconds);
         navigate("/");
       })
-      .catch(err => {
+      .catch((err) => {
         setIsAuth(false);
         setAuthLoading(false);
         setError(err);
@@ -111,9 +111,8 @@ function App() {
     setAuthLoading(true);
 
     fetch("URL")
-      .then(res => {
-        if (res.status === 422)
-          throw new Error("Email already exists.");
+      .then((res) => {
+        if (res.status === 422) throw new Error("Email already exists.");
         if (res.status !== 200 && res.status !== 201)
           throw new Error("Creating user failed.");
         return res.json();
@@ -122,13 +121,13 @@ function App() {
         setAuthLoading(false);
         navigate("/");
       })
-      .catch(err => {
+      .catch((err) => {
         setAuthLoading(false);
         setError(err);
       });
   };
 
-  const setAutoLogout = milliseconds => {
+  const setAutoLogout = (milliseconds) => {
     setTimeout(logoutHandler, milliseconds);
   };
 
@@ -141,21 +140,11 @@ function App() {
     <Routes>
       <Route
         path="/"
-        element={
-          <LoginPage
-            onLogin={loginHandler}
-            loading={authLoading}
-          />
-        }
+        element={<LoginPage onLogin={loginHandler} loading={authLoading} />}
       />
       <Route
         path="/signup"
-        element={
-          <SignupPage
-            onSignup={signupHandler}
-            loading={authLoading}
-          />
-        }
+        element={<SignupPage onSignup={signupHandler} loading={authLoading} />}
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -163,15 +152,10 @@ function App() {
 
   const privateRoutes = (
     <Routes>
-      <Route
-        path="/"
-        element={<FeedPage userId={userId} token={token} />}
-      />
+      <Route path="/" element={<FeedPage userId={userId} token={token} />} />
       <Route
         path="/:postId"
-        element={
-          <SinglePostPage userId={userId} token={token} />
-        }
+        element={<SinglePostPage userId={userId} token={token} />}
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

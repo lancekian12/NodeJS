@@ -1,8 +1,14 @@
 {
+  "name": "nodejs-rest",
+  "version": "1.0.0",
   "dependencies": {
     "express": "^5.2.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
+  },
+  "scripts": {
+    "start": "nodemon app.js",
+    "dev": "nodemon index.js"
   }
 }
