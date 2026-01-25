@@ -1,0 +1,52 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
+import Image from "../../../components/Image/Image";
+import "./SinglePost.css";
+
+function SinglePost() {
+  const { postId } = useParams();
+
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [date, setDate] = useState("");
+  const [image, setImage] = useState("");
+  const [content, setContent] = useState("");
+
+  useEffect(() => {
+    fetch("URL")
+      .then(res => {
+        if (res.status !== 200) {
+          throw new Error("Failed to fetch post");
+        }
+        return res.json();
+      })
+      .then(resData => {
+        setTitle(resData.post.title);
+        setAuthor(resData.post.creator.name);
+        setDate(
+          new Date(resData.post.createdAt).toLocaleDateString("en-US")
+        );
+        setContent(resData.post.content);
+        setImage(resData.post.imageUrl);
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }, [postId]);
+
+  return (
+    <section className="single-post">
+      <h1>{title}</h1>
+      <h2>
+        Created by {author} on {date}
+      </h2>
+      <div className="single-post__image">
+        <Image contain imageUrl={image} />
+      </div>
+      <p>{content}</p>
+    </section>
+  );
+}
+
+export default SinglePost;
