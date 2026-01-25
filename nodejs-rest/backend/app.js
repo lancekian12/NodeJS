@@ -1,7 +1,10 @@
-const express = require('express');
-const bodyParser = require('body-parser');
+require("dotenv").config();
+const database = require("./utils/database");
 
-const feedRoutes = require('./routes/feed');
+const express = require("express");
+const bodyParser = require("body-parser");
+
+const feedRoutes = require("./routes/feed");
 
 const app = express();
 
@@ -9,16 +12,25 @@ const app = express();
 app.use(bodyParser.json()); // application/json
 
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    next();
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "OPTIONS, GET, POST, PUT, PATCH, DELETE",
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
 });
 
-app.use('/feed', feedRoutes);
+app.use("/feed", feedRoutes);
 
 const PORT = 8080;
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+database()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log("🚀 Server running on http://localhost:8080");
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+  });
