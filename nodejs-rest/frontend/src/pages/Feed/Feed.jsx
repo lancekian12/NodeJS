@@ -38,23 +38,28 @@ const Feed = () => {
   const loadPosts = (direction) => {
     setPostsLoading(true);
 
-    let page = postPage;
-    if (direction === "next") page++;
-    if (direction === "previous") page--;
+    setPostPage((prevPage) => {
+      const page =
+        direction === "next"
+          ? prevPage + 1
+          : direction === "previous"
+            ? prevPage - 1
+            : prevPage;
 
-    setPostPage(page);
+      fetch(`http://localhost:8080/feed/posts?page=${page}`)
+        .then((res) => {
+          if (res.status !== 200) throw new Error("Failed to fetch posts.");
+          return res.json();
+        })
+        .then((resData) => {
+          setPosts(resData.posts);
+          setTotalPosts(resData.totalItems);
+          setPostsLoading(false);
+        })
+        .catch(catchError);
 
-    fetch("http://localhost:8080/feed/posts")
-      .then((res) => {
-        if (res.status !== 200) throw new Error("Failed to fetch posts.");
-        return res.json();
-      })
-      .then((resData) => {
-        setPosts(resData.posts);
-        setTotalPosts(resData.totalItems);
-        setPostsLoading(false);
-      })
-      .catch(catchError);
+      return page;
+    });
   };
 
   const statusUpdateHandler = (event) => {
