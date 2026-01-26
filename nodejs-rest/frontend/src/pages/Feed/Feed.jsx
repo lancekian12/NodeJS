@@ -87,18 +87,20 @@ const Feed = () => {
   };
 
   const finishEditHandler = (postData) => {
+    
     setEditLoading(true);
-
     let url = "http://localhost:8080/feed/post";
     let method = "POST";
     if (editPost) url = "URL"; // edit URL
     // Prepare body
-    const body = { title: postData.title, content: postData.content };
+    const formData = new FormData();
+    formData.append("title", postData.title);
+    formData.append("content", postData.content);
+    formData.append("image", postData.image); // MUST be a File object
 
     fetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: formData,
     })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201)
