@@ -87,16 +87,20 @@ const Feed = () => {
   };
 
   const finishEditHandler = (postData) => {
-    
     setEditLoading(true);
     let url = "http://localhost:8080/feed/post";
     let method = "POST";
-    if (editPost) url = "URL"; // edit URL
+    if (editPost) {
+      url = `http://localhost:8080/feed/post/${editPost._id}`;
+      method = "PUT";
+    } // edit URL
     // Prepare body
     const formData = new FormData();
     formData.append("title", postData.title);
     formData.append("content", postData.content);
-    formData.append("image", postData.image); // MUST be a File object
+    if (postData.image) {
+      formData.append("image", postData.image);
+    }
 
     fetch(url, {
       method,
