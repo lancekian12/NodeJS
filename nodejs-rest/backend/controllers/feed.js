@@ -33,7 +33,7 @@ exports.createPost = (req, res, next) => {
     error.statusCode = 422;
     throw error;
   }
-  const imageUrl = req.file.path.replace(/\\/g, '/')
+  const imageUrl = req.file.path.replace(/\\/g, "/");
   const title = req.body.title;
   const content = req.body.content;
   const post = new Post({
@@ -91,7 +91,7 @@ exports.updatePost = (req, res, next) => {
   const content = req.body.content;
 
   Post.findById(postId)
-    .then(post => {
+    .then((post) => {
       if (!post) {
         const error = new Error("Could not find post.");
         error.statusCode = 404;
@@ -101,7 +101,7 @@ exports.updatePost = (req, res, next) => {
       let imageUrl = post.imageUrl;
 
       if (req.file) {
-        imageUrl = req.file.path.replace(/\\/g, '/');
+        imageUrl = req.file.path.replace(/\\/g, "/");
         clearImage(post.imageUrl);
       }
 
@@ -111,15 +111,39 @@ exports.updatePost = (req, res, next) => {
 
       return post.save();
     })
-    .then(result => {
+    .then((result) => {
       res.status(200).json({ message: "Post updated!", post: result });
     })
-    .catch(err => {
+    .catch((err) => {
       if (!err.statusCode) err.statusCode = 500;
       next(err);
     });
 };
 
+exports.deletePost = (req, res, next) => {
+  const postId = req.params.postId;
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Could not find post.");
+        error.statusCode = 404;
+        throw error;
+      }
+      // Check logged in user
+      clearImage(post.imageUrl);
+      return Post.findByIdAndDelete(postId);
+    })
+    .then((result) => {
+      console.log(result);
+      res.status(200).json({ message: "Deleted post." });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
 
 const clearImage = (filePath) => {
   filePath = path.join(__dirname, "..", filePath);
