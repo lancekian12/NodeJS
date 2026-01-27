@@ -2,6 +2,7 @@
   "name": "nodejs-rest",
   "version": "1.0.0",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-validator": "^7.3.1",
