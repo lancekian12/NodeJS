@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import Image from "../../../components/Image/Image";
 import "./SinglePost.css";
 
-const SinglePost = () => {
+const SinglePost = (props) => {
   const { postId } = useParams();
 
   const [title, setTitle] = useState("");
@@ -14,7 +14,13 @@ const SinglePost = () => {
   const [content, setContent] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8080/feed/post/${postId}`)
+    fetch(`http://localhost:8080/feed/post/${postId}`, {
+      method: "GET", // optional, default is GET
+      headers: {
+        Authorization: "Bearer " + props.token,
+        "Content-Type": "application/json", // optional for GET
+      },
+    })
       .then((res) => {
         if (res.status !== 200) {
           throw new Error("Failed to fetch post");

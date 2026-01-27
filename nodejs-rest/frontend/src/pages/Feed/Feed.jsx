@@ -48,8 +48,8 @@ const Feed = (props) => {
 
       fetch(`http://localhost:8080/feed/posts?page=${page}`, {
         headers: {
-          Authorization: "Bearer " + props.token
-        }
+          Authorization: "Bearer " + props.token,
+        },
       })
         .then((res) => {
           if (res.status !== 200) throw new Error("Failed to fetch posts.");
@@ -114,6 +114,9 @@ const Feed = (props) => {
     fetch(url, {
       method,
       body: formData,
+      headers: {
+        Authorization: "Bearer " + props.token,
+      },
     })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201)
@@ -151,7 +154,12 @@ const Feed = (props) => {
 
   const deletePostHandler = (postId) => {
     setPostsLoading(true);
-    fetch(`http://localhost:8080/feed/post/${postId}`, { method: "DELETE" })
+    fetch(`http://localhost:8080/feed/post/${postId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: "Bearer " + props.token,
+      },
+    })
       .then((res) => {
         if (res.status !== 200 && res.status !== 201)
           throw new Error("Deleting a post failed!");
