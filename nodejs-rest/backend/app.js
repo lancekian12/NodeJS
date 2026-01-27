@@ -1,4 +1,5 @@
 require("dotenv").config();
+console.log("JWT Secret:", process.env.SECRETKEY);
 const database = require("./utils/database");
 const { v4: uuidv4 } = require("uuid");
 const path = require("path");
