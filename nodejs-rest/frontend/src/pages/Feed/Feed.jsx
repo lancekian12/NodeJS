@@ -39,12 +39,7 @@ const Feed = (props) => {
 
     socketRef.current.on("posts", (data) => {
       if (data.action === "create") {
-        setPosts((prevPosts) => {
-          if (prevPosts.some((p) => p._id === data.post._id)) {
-            return prevPosts;
-          }
-          return [data.post, ...prevPosts];
-        });
+        addPost(data.post);
       }
 
       if (data.action === "update") {
@@ -145,6 +140,26 @@ const Feed = (props) => {
   const cancelEditHandler = () => {
     setIsEditing(false);
     setEditPost(null);
+  };
+
+  const addPost = (post) => {
+    setPosts((prevPosts) => {
+      if (postPage !== 1) {
+        return prevPosts;
+      }
+
+      const updatedPosts = [...prevPosts];
+
+      if (updatedPosts.length >= 2) {
+        updatedPosts.pop();
+      }
+
+      updatedPosts.unshift(post);
+
+      return updatedPosts;
+    });
+
+    setTotalPosts((prevTotal) => prevTotal + 1);
   };
 
   const finishEditHandler = (postData) => {
