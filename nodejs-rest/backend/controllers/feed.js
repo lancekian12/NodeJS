@@ -68,12 +68,12 @@ exports.createPost = async (req, res, next) => {
     user.posts.push(post);
     await user.save();
 
-        socket.getIO().emit("posts", {
+    socket.getIO().emit("posts", {
       action: "create",
       post: {
         ...post._doc,
-        creator: { _id: user._id, name: user.name }
-      }
+        creator: { _id: user._id, name: user.name },
+      },
     });
 
     res.status(201).json({
@@ -153,6 +153,11 @@ exports.updatePost = async (req, res, next) => {
     post.content = content;
 
     const result = await post.save();
+
+    socket.getIO().emit("posts", {
+      action: "update",
+      post: result,
+    });
     res.status(200).json({ message: "Post updated!", post: result });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
@@ -179,7 +184,14 @@ exports.deletePost = async (req, res, next) => {
     }
 
     clearImage(post.imageUrl);
-    await Post.findByIdAndRemove(postId);
+
+    // Use modern Mongoose method
+    await Post.findByIdAndDelete(postId);
+
+    socket.getIO().emit("posts", {
+      action: "delete",
+      postId: postId,
+    });
 
     const user = await User.findById(req.userId);
     user.posts.pull(postId);
