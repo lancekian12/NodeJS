@@ -10,7 +10,10 @@ const bodyParser = require("body-parser");
 const feedRoutes = require("./routes/feed");
 const authRoutes = require("./routes/auth");
 
+const socket = require("./utils/socket");
 const app = express();
+const http = require("http");
+const server = http.createServer(app);
 
 const fileStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -50,7 +53,6 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use("/feed", feedRoutes);
 app.use("/auth", authRoutes);
 
@@ -65,8 +67,18 @@ const PORT = 8080;
 
 database()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log("🚀 Server running on http://localhost:8080");
+    const io = socket.init(server);
+
+    io.on("connection", (clientSocket) => {
+      console.log("🔌 Client connected:", clientSocket.id);
+
+      clientSocket.on("disconnect", () => {
+        console.log("🔌 Client disconnected:", clientSocket.id);
+      });
+    });
+
+    server.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
