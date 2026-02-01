@@ -55,8 +55,8 @@ const Feed = (props) => {
         direction === "next"
           ? prevPage + 1
           : direction === "previous"
-          ? prevPage - 1
-          : prevPage;
+            ? prevPage - 1
+            : prevPage;
 
       fetch(`http://localhost:8080/feed/posts?page=${page}`, {
         headers: {
@@ -124,14 +124,6 @@ const Feed = (props) => {
   const finishEditHandler = (postData) => {
     setEditLoading(true);
 
-    let url = "http://localhost:8080/feed/post";
-    let method = "POST";
-
-    if (editPost) {
-      url = `http://localhost:8080/feed/post/${editPost._id}`;
-      method = "PUT";
-    }
-
     const formData = new FormData();
     formData.append("title", postData.title);
     formData.append("content", postData.content);
@@ -139,18 +131,44 @@ const Feed = (props) => {
       formData.append("image", postData.image);
     }
 
-    fetch(url, {
-      method,
-      body: formData,
+    let graphqlQuery = {
+      query: `
+        mutation {
+          createPost(postInput: {title: "${postData.title}", content: "${
+            postData.content
+          }", imageUrl: "some url"}) {
+            _id
+            title
+            content
+            imageUrl
+            creator {
+              name
+            }
+            createdAt
+          }
+        }
+      `,
+    };
+
+    fetch("http://localhost:8080/graphql", {
+      method: "POST",
+      body: JSON.stringify(graphqlQuery),
       headers: {
         Authorization: "Bearer " + props.token,
+        'Content-Type': 'application/json'
       },
     })
-      .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Creating or editing post failed!");
+      .then(res => res.json())
+      .then((resData) => {
+        if (resData.errors) {
+          const error = resData.errors[0];
+
+          if (error.status === 422) {
+            throw new Error("Post already exists.");
+          }
+
+          throw new Error(error.message || "Post creation failed!");
         }
-        return res.json();
       })
       .then(() => {
         setIsEditing(false);
