@@ -116,23 +116,34 @@ function App() {
   const signupHandler = (event, authData) => {
     event.preventDefault();
     setAuthLoading(true);
-
-    fetch("http://localhost:8080/auth/signup", {
-      method: "PUT",
+    const graphqlQuery = {
+      query: `
+        mutation {
+          createUser(userInput: {email: "${authData.email.value}", name: "${authData.name.value}", password: "${authData.name.value}"}){
+          _id
+          email
+          }
+        }
+    `,
+    };
+    fetch("http://localhost:8080/graphql", {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: authData.email.value,
-        password: authData.password.value,
-        name: authData.name.value,
-      }),
+      body: JSON.stringify(graphqlQuery),
     })
       .then((res) => {
-        if (res.status === 422) throw new Error("Email already exists.");
-        if (res.status !== 200 && res.status !== 201)
-          throw new Error("Creating user failed.");
         return res.json();
       })
-      .then(() => {
+      .then((resData) => {
+        if (resData.errors) {
+          const error = resData.errors[0];
+
+          if (error.status === 422) {
+            throw new Error("Email already exists.");
+          }
+
+          throw new Error(error.message || "User creation failed!");
+        }
         setAuthLoading(false);
         navigate("/");
       })
