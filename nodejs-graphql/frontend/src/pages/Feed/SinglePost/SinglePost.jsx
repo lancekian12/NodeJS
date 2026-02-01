@@ -1,0 +1,56 @@
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+
+import Image from "../../../components/Image/Image";
+import "./SinglePost.css";
+
+const SinglePost = (props) => {
+  const { postId } = useParams();
+
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [date, setDate] = useState("");
+  const [image, setImage] = useState("");
+  const [content, setContent] = useState("");
+
+  useEffect(() => {
+    fetch(`http://localhost:8080/feed/post/${postId}`, {
+      method: "GET", // optional, default is GET
+      headers: {
+        Authorization: "Bearer " + props.token,
+        "Content-Type": "application/json", // optional for GET
+      },
+    })
+      .then((res) => {
+        if (res.status !== 200) {
+          throw new Error("Failed to fetch post");
+        }
+        return res.json();
+      })
+      .then((resData) => {
+        setTitle(resData.post.title);
+        setAuthor(resData.post.creator.name);
+        setImage("http://localhost:8080/" + resData.post.imageUrl);
+        setDate(new Date(resData.post.createdAt).toLocaleDateString("en-US"));
+        setContent(resData.post.content);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [postId]);
+
+  return (
+    <section className="single-post">
+      <h1>{title}</h1>
+      <h2>
+        Created by {author} on {date}
+      </h2>
+      <div className="single-post__image">
+        <Image contain imageUrl={image} />
+      </div>
+      <p>{content}</p>
+    </section>
+  );
+};
+
+export default SinglePost;
