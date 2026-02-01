@@ -73,14 +73,20 @@ function App() {
   const loginHandler = (event, authData) => {
     event.preventDefault();
     setAuthLoading(true);
-
-    fetch("http://localhost:8080/auth/login", {
+    const graphqlQuery = {
+      query: `
+        {
+          login(email: "${authData.email}", password: "${authData.password}") {
+            token
+            userId
+          }
+        }
+      `,
+    };
+    fetch("http://localhost:8080/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: authData.email,
-        password: authData.password,
-      }),
+      body: JSON.stringify(graphqlQuery),
     })
       .then((res) => {
         if (res.status === 422) throw new Error("Validation failed.");
@@ -90,12 +96,12 @@ function App() {
       })
       .then((resData) => {
         setIsAuth(true);
-        setToken(resData.token);
-        setUserId(resData.userId);
+        setToken(resData.data.login.token);
+        setUserId(resData.data.login.userId);
         setAuthLoading(false);
 
-        localStorage.setItem("token", resData.token);
-        localStorage.setItem("userId", resData.userId);
+        localStorage.setItem("token", resData.data.login.token);
+        localStorage.setItem("userId", resData.data.login.userId);
 
         const remainingMilliseconds = 60 * 60 * 1000;
         const expiryDate = new Date(
