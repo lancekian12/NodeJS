@@ -162,7 +162,7 @@ const Feed = (props) => {
       .then((res) => res.json())
       .then((fileResData) => {
         const imageUrl = fileResData.filePath;
-        const graphqlQuery = {
+        let graphqlQuery = {
           query: `
             mutation CreatePost($title: String!, $content: String!, $imageUrl: String!) {
               createPost(postInput: {
@@ -182,6 +182,26 @@ const Feed = (props) => {
             imageUrl,
           },
         };
+        if (editPost) {
+          graphqlQuery = {
+            query: `
+              mutation {
+                updatePost(id: "${editPost._id}", postInput: {title: "${postData.title}", content: "${
+                  postData.content
+                }", imageUrl: "${imageUrl}"}) {
+                  _id
+                  title
+                  content
+                  imageUrl
+                  creator {
+                    name
+                  }
+                  createdAt
+                }
+              }
+            `,
+          };
+        }
 
         return fetch("http://localhost:8080/graphql", {
           method: "POST",
