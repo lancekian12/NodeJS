@@ -71,8 +71,8 @@ const Feed = (props) => {
             : prevPage;
       const graphqlQuery = {
         query: `
-          {
-            posts(page: ${page}) {
+          query FetchPosts($page: Int){
+            posts(page: $page) {
               posts {
                 _id
                 title
@@ -86,6 +86,9 @@ const Feed = (props) => {
               totalPosts
             }
           }`,
+        variables: {
+          page: page
+        }
       };
 
       fetch(`http://localhost:8080/graphql`, {
