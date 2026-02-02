@@ -25,19 +25,31 @@ const Feed = (props) => {
   // =========================
   useEffect(() => {
     // Fetch user status
-    fetch("URL", {
+    const graphqlQuery = {
+      query: `
+        {
+          user {
+            status
+          }
+        }
+      `,
+    };
+    fetch("http://localhost:8080/graphql", {
+      method: "POST",
       headers: {
         Authorization: "Bearer " + props.token,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(graphqlQuery),
     })
       .then((res) => {
-        if (res.status !== 200) {
-          throw new Error("Failed to fetch user status.");
-        }
         return res.json();
       })
       .then((resData) => {
-        setStatus(resData.status);
+        if (resData.errors) {
+          throw new Error("Fetching status failed!");
+        }
+        setStatus(resData.data.user.status);
       })
       .catch(catchError);
 
@@ -106,20 +118,34 @@ const Feed = (props) => {
   // =========================
   const statusUpdateHandler = (event) => {
     event.preventDefault();
-
-    fetch("URL", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + props.token,
-      },
-      body: JSON.stringify({ status }),
-    })
-      .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Can't update status!");
+    const graphqlQuery = {
+      query: `
+        mutation UpdateUserStatus($userStatus: String!) {
+          updateStatus(status: $userStatus) {
+            status
+          }
         }
+      `,
+      variables: {
+        userStatus: status,
+      },
+    };
+    fetch("http://localhost:8080/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + props.token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(graphqlQuery),
+    })
+      .then(res => {
         return res.json();
+      })
+      .then(resData => {
+        if (resData.errors) {
+          throw new Error('Fetching posts failed!');
+        }
+        console.log(resData);
       })
       .catch(catchError);
   };
@@ -256,7 +282,7 @@ const Feed = (props) => {
     fetch("http://localhost:8080/graphql", {
       method: "POST",
       headers: {
-        Authorization: "Bearer " + props.token, 
+        Authorization: "Bearer " + props.token,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(graphqlQuery),
