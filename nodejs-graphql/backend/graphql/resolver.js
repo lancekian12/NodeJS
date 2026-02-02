@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
 const Post = require("../models/post");
+const { clearImage } = require("../utils/file");
 
 module.exports = {
   createUser: async function ({ userInput }, req) {
@@ -204,27 +205,38 @@ module.exports = {
     };
   },
   deletePost: async function ({ id }, req) {
-    if (!req.isAuth) {
-      const error = new Error("Not authenticated!");
-      error.code = 401;
-      throw error;
-    }
+    if (!req.isAuth) throw new Error("Not authenticated!");
+
+    // Find post WITHOUT populating
     const post = await Post.findById(id);
-    if (!post) {
-      const error = new Error("No post found!");
-      error.code = 404;
-      throw error;
+    if (!post) throw new Error("No post found!");
+
+    console.log("Post creator:", post.creator.toString());
+    console.log("Request userId:", req.userId);
+
+    // Only the creator can delete
+    if (post.creator.toString() !== req.userId) {
+      throw new Error("Not authorized!");
     }
-    if (post.creator.toString() !== req.userId.toString()) {
-      const error = new Error("Not authorized!");
-      error.code = 403;
-      throw error;
+
+    // Delete image from filesystem
+    if (post.imageUrl) {
+      const imagePath = post.imageUrl.replace("http://localhost:8080/", "");
+      clearImage(imagePath);
     }
-    clearImage(post.imageUrl);
-    await Post.findByIdAndRemove(id);
+
+    // Delete the post from DB
+    await Post.findByIdAndDelete(id);
+    console.log("Post deleted from DB");
+
+    // Remove reference from user
     const user = await User.findById(req.userId);
-    user.posts.pull(id);
-    await user.save();
+    if (user) {
+      user.posts.pull(id);
+      await user.save();
+      console.log("Post reference removed from user");
+    }
+
     return true;
   },
 };

@@ -10,7 +10,7 @@ const { graphqlHTTP } = require("express-graphql");
 const graphqlSchema = require("./graphql/schema");
 const graphqlResolver = require("./graphql/resolver");
 const auth = require("./middleware/auth");
-const fs = require("fs");
+const {clearImage} = require('./utils/file')
 const app = express();
 
 const fileStorage = multer.diskStorage({
@@ -109,8 +109,3 @@ database()
   .catch((err) => {
     console.log(err);
   });
-
-const clearImage = (filePath) => {
-  filePath = path.join(__dirname, "..", filePath);
-  fs.unlink(filePath, (err) => console.log(err));
-};

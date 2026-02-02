@@ -245,27 +245,34 @@ const Feed = (props) => {
   const deletePostHandler = (postId) => {
     setPostsLoading(true);
 
-    fetch(`http://localhost:8080/feed/post/${postId}`, {
-      method: "DELETE",
+    const graphqlQuery = {
+      query: `
+      mutation {
+        deletePost(id: "${postId}")
+      }
+    `,
+    };
+
+    fetch("http://localhost:8080/graphql", {
+      method: "POST",
       headers: {
-        Authorization: "Bearer " + props.token,
+        Authorization: "Bearer " + props.token, 
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(graphqlQuery),
     })
-      .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Deleting post failed!");
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.errors) {
+          throw new Error("Deleting the post failed!");
         }
-        return res.json();
-      })
-      .then(() => {
-        loadPosts(); // 🔁 Refresh after delete
+        loadPosts(); // refresh feed
       })
       .catch((err) => {
         setPostsLoading(false);
         setError(err);
       });
   };
-
   const statusInputChangeHandler = (input, value) => {
     setStatus(value);
   };
