@@ -57,21 +57,41 @@ const Feed = (props) => {
           : direction === "previous"
             ? prevPage - 1
             : prevPage;
+      const graphqlQuery = {
+        query: `
+          {
+            posts {
+              posts {
+                _id
+                title
+                content
+                creator {
+                  name
+                }
+                createdAt
+              }
+              totalPosts
+            }
+          }`,
+      };
 
-      fetch(`http://localhost:8080/feed/posts?page=${page}`, {
+      fetch(`http://localhost:8080/graphql`, {
+        method: "POST",
         headers: {
           Authorization: "Bearer " + props.token,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify(graphqlQuery),
       })
         .then((res) => {
-          if (res.status !== 200) {
-            throw new Error("Failed to fetch posts.");
-          }
           return res.json();
         })
         .then((resData) => {
-          setPosts(resData.posts);
-          setTotalPosts(resData.totalItems);
+          if (resData.errors) {
+            throw new Error("Failed to fetch posts.");
+          }
+          setPosts(resData.data.posts.posts);
+          setTotalPosts(resData.data.posts.totalPosts);
           setPostsLoading(false);
         })
         .catch(catchError);
@@ -155,10 +175,10 @@ const Feed = (props) => {
       body: JSON.stringify(graphqlQuery),
       headers: {
         Authorization: "Bearer " + props.token,
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
     })
-      .then(res => res.json())
+      .then((res) => res.json())
       .then((resData) => {
         if (resData.errors) {
           const error = resData.errors[0];
