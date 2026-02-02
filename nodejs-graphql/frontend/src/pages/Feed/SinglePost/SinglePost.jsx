@@ -14,25 +14,46 @@ const SinglePost = (props) => {
   const [content, setContent] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8080/feed/post/${postId}`, {
-      method: "GET", // optional, default is GET
+    const graphqlQuery = {
+      query: `
+    query GetPost($id: ID!) {
+      post(id: $id) {
+        title
+        content
+        imageUrl
+        creator {
+          name
+        }
+        createdAt
+      }
+    }
+  `,
+      variables: {
+        id: postId,
+      },
+    };
+    fetch(`http://localhost:8080/graphql`, {
+      method: "POST",
       headers: {
         Authorization: "Bearer " + props.token,
         "Content-Type": "application/json", // optional for GET
       },
+      body: JSON.stringify(graphqlQuery),
     })
       .then((res) => {
-        if (res.status !== 200) {
-          throw new Error("Failed to fetch post");
-        }
         return res.json();
       })
       .then((resData) => {
-        setTitle(resData.post.title);
-        setAuthor(resData.post.creator.name);
-        setImage("http://localhost:8080/" + resData.post.imageUrl);
-        setDate(new Date(resData.post.createdAt).toLocaleDateString("en-US"));
-        setContent(resData.post.content);
+        if (resData.errors) {
+          throw new Error("Failed to fetch post");
+        }
+        setTitle(resData.data.post.title);
+        setAuthor(resData.data.post.creator.name);
+        setImage(resData.data.post.imageUrl);
+        setDate(
+          new Date(resData.data.post.createdAt).toLocaleDateString("en-US"),
+        );
+        setContent(resData.data.post.content);
       })
       .catch((err) => {
         console.error(err);
@@ -46,7 +67,15 @@ const SinglePost = (props) => {
         Created by {author} on {date}
       </h2>
       <div className="single-post__image">
-        <Image contain imageUrl={image} />
+        <img
+          src={image}
+          alt={title}
+          style={{
+            width: "100%",
+            maxHeight: "30rem",
+            objectFit: "contain",
+          }}
+        />
       </div>
       <p>{content}</p>
     </section>
