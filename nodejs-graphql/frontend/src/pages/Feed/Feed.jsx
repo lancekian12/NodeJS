@@ -65,6 +65,7 @@ const Feed = (props) => {
                 _id
                 title
                 content
+                imageUrl
                 creator {
                   name
                 }
@@ -145,39 +146,53 @@ const Feed = (props) => {
     setEditLoading(true);
 
     const formData = new FormData();
-    formData.append("title", postData.title);
-    formData.append("content", postData.content);
     if (postData.image) {
       formData.append("image", postData.image);
     }
-
-    let graphqlQuery = {
-      query: `
-        mutation {
-          createPost(postInput: {title: "${postData.title}", content: "${
-            postData.content
-          }", imageUrl: "some url"}) {
-            _id
-            title
-            content
-            imageUrl
-            creator {
-              name
-            }
-            createdAt
-          }
-        }
-      `,
-    };
-
-    fetch("http://localhost:8080/graphql", {
-      method: "POST",
-      body: JSON.stringify(graphqlQuery),
+    if (editPost) {
+      formData.append("oldPath", editPost.imagePath);
+    }
+    fetch("http://localhost:8080/post-image", {
+      method: "PUT",
       headers: {
         Authorization: "Bearer " + props.token,
-        "Content-Type": "application/json",
       },
+      body: formData,
     })
+      .then((res) => res.json())
+      .then((fileResData) => {
+        const imageUrl = fileResData.filePath;
+        const graphqlQuery = {
+          query: `
+            mutation CreatePost($title: String!, $content: String!, $imageUrl: String!) {
+              createPost(postInput: {
+                title: $title
+                content: $content
+                imageUrl: $imageUrl
+              }) {
+                _id
+                title
+                imageUrl
+              }
+            }
+          `,
+          variables: {
+            title: postData.title,
+            content: postData.content,
+            imageUrl,
+          },
+        };
+
+        return fetch("http://localhost:8080/graphql", {
+          method: "POST",
+          body: JSON.stringify(graphqlQuery),
+          headers: {
+            Authorization: "Bearer " + props.token,
+            "Content-Type": "application/json",
+          },
+        });
+      })
+
       .then((res) => res.json())
       .then((resData) => {
         if (resData.errors) {
