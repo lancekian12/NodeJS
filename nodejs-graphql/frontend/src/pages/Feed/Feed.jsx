@@ -60,7 +60,7 @@ const Feed = (props) => {
       const graphqlQuery = {
         query: `
           {
-            posts {
+            posts(page: ${page}) {
               posts {
                 _id
                 title
